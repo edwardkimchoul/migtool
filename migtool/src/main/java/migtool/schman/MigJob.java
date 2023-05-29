@@ -2,10 +2,18 @@ package migtool.schman;
 
 public class MigJob {
 
+	private int    procesId;
 	private String dbName;
 	private String procedureName;
-	private String SqlType;
+	private String sqlType;
 	
+	
+	public int getProcesId() {
+		return procesId;
+	}
+	public void setProcesId(int procesId) {
+		this.procesId = procesId;
+	}
 	public String getDbName() {
 		return dbName;
 	}
@@ -19,11 +27,13 @@ public class MigJob {
 		this.procedureName = procedureName;
 	}
 	public String getSqlType() {
-		return SqlType;
+		return sqlType;
 	}
 	public void setSqlType(String sqlType) {
-		SqlType = sqlType;
+		this.sqlType = sqlType;
 	}
+	
+
 	
 
 }
