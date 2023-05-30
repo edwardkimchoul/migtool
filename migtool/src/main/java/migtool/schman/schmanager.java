@@ -10,11 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import KALDBConversion.Exception;
-import KALDBConversion.HashMap;
-import KALDBConversion.PreparedStatement;
-import KALDBConversion.ResultSet;
-import KALDBConversion.ResultSetMetaData;
 
 public class schmanager {
 
@@ -76,7 +71,6 @@ public class schmanager {
 				+ " WHERE M.MIG_STATUS_CD = 'R'   \n"
 				+ "   AND FN_MIG_NOT_COMPLETE_CNT( M.PRECEDING_WORK_LIST ) = 0 \n"
 				+ "   ORDER BY PROCESS_ID";
-<<<<<<< HEAD
 		List<MigJob> tasklist = new ArrayList<>();
 
 		try (PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
@@ -96,44 +90,6 @@ public class schmanager {
 				throw new Exception(" Mig Target list Error ");
 			} 	
 		return tasklist;
-=======
-		List<MigJob> list = new ArrayList<>();
-		
-		try (PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
-			     ResultSet rs = s1.executeQuery()) {
-				    ResultSetMetaData  rsmtadta = rs.getMetaData();
-				    int colCount = rsmtadta.getColumnCount();
-				    String col_name = "";
-				    while(rs.next()) {
-				    	map = new HashMap<String, String>();
-			            for( int i = 1 ; i <= colCount ; i++ ) {
-			            	col_name = rsmtadta.getColumnName(i).toUpperCase();
-			                map.put(col_name, rs.getString(col_name));
-			            }
-			            convTableList.add(map);
-			        }
-				if(convTableList.size() == 0) {
-					logger.error(" Conversion Table에 해당 Task의 자료가 없거나 조건에 맞는 테이블이 존재하지 않습니다.");
-					throw new Exception(" Table List size = 0");
-				}
-			} catch(Exception ex) {
-				ex.printStackTrace();
-				throw new Exception(" Conversion Table List 가져오는 쿼리를 수행하는 중 에러가 발생하였습니다. ");
-			} 	
-		
-		try {
-			
-			
-			
-			
-			//while(rs.next()) {
-				
-			
-		} catch(Exception e) {
-			
-		}
-		return list;
->>>>>>> branch 'master' of https://github.com/edwardkimchoul/migtool
 	}
 
 	private static boolean isMigComplete(Connection conn) throws Exception {
