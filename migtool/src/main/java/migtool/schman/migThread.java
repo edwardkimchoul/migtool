@@ -43,9 +43,9 @@ public class migThread {
 	    	 // 4. 수행결과 Update
 
 	    	  Map<String, String> map = new HashMap<String, String>();
-	    	  schmanager.updateStatus(conn, process_id, "C");
-	    	  schmanager.updateMigTool(conn, map);
-	    	  schmanager.insertMigJobHistory(conn, map);
+//	    	  schmanager.updateStatus(conn, process_id, "C");
+//	    	  schmanager.updateMigTool(conn, map);
+//	    	  schmanager.insertMigJobHistory(conn, map);
 	    	  
 	        Thread.sleep(1000);
 	      } catch (Exception e) {
