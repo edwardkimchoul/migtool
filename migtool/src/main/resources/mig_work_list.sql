@@ -14,14 +14,14 @@ CREATE TABLE UGENS.MIG_PROCESS_LIST (
 );
 
 DROP TABLE UGENS.MIG_PROCESS_HIST CASCADE CONSTRAINTS;
-CREATE TABLE UGENS.MIG_PROCESS_HIST {
+CREATE TABLE UGENS.MIG_PROCESS_HIST (
         MIG_HIST_NAME          VARCHAR2(20)   /* 이행한 날짜를 넣을것 2022-05-23  이행수행단위로 관리하기 위함  */    
 			,	PROCESS_ID             NUMBER(10)
-			,	MIG_START_TM           DATE           /* 시작일시 */
-			,	MIG_END_TM             DATE
-			,	PROCESS_SECOND         NUMBER(10)
-			,	ROW_CNT                NUMBER(12)             /* 이행된 row count */
-			,	ERROR_MESSAGE          VARCHAR2(4000)         /* 에러가 있으면 넣음 */
+			,	START_TIME             VARCHAR2(30)           /* 시작일시 */
+			,	STOP_TIME              VARCHAR2(30)
+			,	EXECUTION_TIME         NUMBER(10)
+			,	ROW_COUNT              NUMBER(12)             /* 이행된 row count */
+			,	ERROR                  VARCHAR2(4000)         /* 에러가 있으면 넣음 */
 			, CRE_DATE               DATE   DEFAULT SYSDATE 
 			, constraint MIG_PROCESS_HIST_PK1 PRIMARY KEY ( MIG_HIST_NAME   , PROCESS_ID ) 
-)
+);
