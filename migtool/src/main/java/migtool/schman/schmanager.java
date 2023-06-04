@@ -3,7 +3,6 @@ package migtool.schman;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,11 +23,11 @@ public class schmanager {
 	 * 현재 작업의 Update를 위해
 	 */
 	public synchronized static void updateStatus(Map<String, String> map) throws Exception {
-		final String sql1 ="UPDATE  MIG_PROCESS_LIST \n"
+		final String sql1 ="UPDATE  CNV_PROCESS_LIST \n"
            				+ "   SET  MIG_STATUS_CD = ?  \n"
 			        	+ " WHREE PROCESS_ID = ?  ";
 		
-		final String sql2 ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
+		final String sql2 ="INSERT INTO CNV_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
 				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
 		
 		try {
@@ -40,7 +39,7 @@ public class schmanager {
 			s1.setString(1, status_cd);
 			s1.setInt(2, process_id);
 			
-		    int cnt = s1.executeUpdate();
+		    s1.executeUpdate();
             /*******************************************************************
 		    // Mig History를 저장
 		     *******************************************************************/
@@ -54,7 +53,7 @@ public class schmanager {
 			s1.setString(6, map.get("ROW_COUNT"));
 			s1.setString(7, map.get("ERROR"));
 
-		    cnt = s1.executeUpdate();		
+		    s1.executeUpdate();		
 		    
 		} catch(Exception ex) {
 			ex.printStackTrace();
@@ -93,7 +92,7 @@ public class schmanager {
 			
 			s1.setString(7, map.get("PROCEDURE_NAME"));
 			
-		    int cnt = s1.executeUpdate();		
+		    s1.executeUpdate();		
 			
 			
 		} catch(Exception ex) {
@@ -104,7 +103,7 @@ public class schmanager {
 	
 	private static List<MigJob> getMigjobList(Connection conn) throws Exception {
 		final String sql ="SELECT M.PROCESS_ID, M.DB_NAME, M.PROCEDURE_NAME, M.SQL_TYPE_CD \n"
-				+ "  FROM MIG_PROCESS_LIST M \n"
+				+ "  FROM CNV_PROCESS_LIST M \n"
 				+ " WHERE M.MIG_STATUS_CD = 'R'   \n"
 				+ "   AND FN_MIG_NOT_COMPLETE_CNT( M.PRECEDING_WORK_LIST ) = 0 \n"
 				+ "   ORDER BY PROCESS_ID";
@@ -132,7 +131,7 @@ public class schmanager {
 	private static boolean isMigComplete(Connection conn) throws Exception {
 		boolean isComplete = false;
 		final String sql ="SELECT COUNT(1) CNT \n"
-				+ "  FROM MIG_PROCESS_LIST M \n"
+				+ "  FROM CNV_PROCESS_LIST M \n"
 				+ " WHERE M.MIG_STATUS_CD IN ( 'R', 'Q', 'P', 'E' ) \n";
 
 		try (PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
@@ -161,7 +160,7 @@ public class schmanager {
 		return formatter.format(today);
 	}	
 //	public synchronized static void insertMigJobHistory(Map<String, String> map) throws Exception {
-//		final String sql ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
+//		final String sql ="INSERT INTO CNV_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
 //				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
 //		try {
 //			PreparedStatement s1 = (PreparedStatement) conn3.prepareStatement(sql);
@@ -182,15 +181,23 @@ public class schmanager {
 //		}
 //	}
 	
-	private static void makeExcelTaskList(Connection conn) {
-		
-	}
-		
+//	private static void makeExcelTaskList(Connection conn) {
+//		
+//	}
+//		
 	public static void main(String[] args) {
 
 		boolean endFlag = false;
 		String sql = "";
-		Connection migconn, stgconn;
+		Connection migconn;
+		
+		if(args.length != 1) {
+			System.out.println("schmanager [taskname] ");
+			System.exit(0);
+		} else {
+			mig_task_name = args[0];     // Task이름은 mig날짜로 할것  20230601 오류시 20230601-1   
+		}
+		
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(10);
 			ConnectionPoolMig migpool = ConnectionPoolMig.getInstance();

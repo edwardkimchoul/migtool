@@ -3,13 +3,12 @@ package migtool.schman;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+//import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Timer;
 
-import oracle.jdbc.internal.OracleTypes;
+//import oracle.jdbc.internal.OracleTypes;
 
 public class migThread {
     public static class Task implements Runnable {
