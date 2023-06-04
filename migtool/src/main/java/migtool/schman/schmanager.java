@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -149,6 +152,14 @@ public class schmanager {
 		return isComplete;
 	}
 	
+	public static String getCurrentDateTime() {
+		Date today = new Date();
+		Locale currentLocale = new Locale("KOREAN", "KOREA");
+		String pattern = "yyyyMMddHHmmss"; //hhmmss로 시간,분,초만 뽑기도 가능
+		SimpleDateFormat formatter = new SimpleDateFormat(pattern,
+				currentLocale);
+		return formatter.format(today);
+	}	
 //	public synchronized static void insertMigJobHistory(Map<String, String> map) throws Exception {
 //		final String sql ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
 //				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
@@ -219,7 +230,10 @@ public class schmanager {
 			}
 			
 			// 엑셀로 이행결과 출력
-			makeExcelTaskList(migconn);
+			//makeExcelTaskList(migconn);
+			
+			// 서비스 Thread를 Down한다.
+			service.shutdown();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Timer;
+
 import oracle.jdbc.internal.OracleTypes;
 
 public class migThread {
@@ -29,8 +31,11 @@ public class migThread {
 	    public void run() {
 //	      log.info("called!");
 	    	String ERR_MSG = ""; 
+	    	String start_time = "";
+	        String stop_time = "";	
+	        String status_cd = "";
 	    	Connection conn = null;
-	    	
+	    	StopWatch timer = new StopWatch();
 	      try {
              // 1. SQL Connection 가겨오기 sychoronize 사용
 	    	  switch(dbname) {
@@ -41,28 +46,37 @@ public class migThread {
 			    	  switch(sql_type) {
 				    	  case "PROCEDURE" :
 				    		  CallableStatement cstmt = null;
-				    		  int rowcnt = 0;
+				    		  String rowcntStr = "0";
 				    		  try {
+				    			  start_time = schmanager.getCurrentDateTime();
 				    			  cstmt = conn.prepareCall(sql);
-				    			  cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+				    			// Out parameter의 Type설정
+				    			  cstmt.registerOutParameter(1, java.sql.Types.VARCHAR );
+//				    			  cstmt.registerOutParameter(1, OracleTypes.CURSOR);
 					    	      cstmt.execute();
 					    	      // Procedure  결과 받기
-					    	      ResultSet rset = (ResultSet)cstmt.getObject(1);
-					    	      while (rset.next ()) {
-					    	      
-					    	      }	
+					    	      String result = cstmt.getString(1);
+					    	      if(result.substring(0, 3).equals("SUC")) {
+					    	    	  status_cd = "C";
+					    	    	  rowcntStr = result.substring(4);
+					    	      } else {
+					    	    	  status_cd = "E";
+					    	    	  ERR_MSG = result.substring(4);
+					    	      }
 
+					    	      stop_time = schmanager.getCurrentDateTime();
 				    		  } catch (Exception e) {
 				    			   System.out.println("[" + process_id + "] ---- Procedure 수행시 오류발생 = "+e.getMessage());
 				    			   ERR_MSG = e.getMessage();
 				    		  } finally {
 					    	      Map<String, String> map = new HashMap<String, String>();
 				    	      
-					 	    	  map.put("START_TIME", dbname);
-					 	    	  map.put("STOP_TIME", dbname);
-					 	    	  map.put("EXECUTION_TIME", dbname);
-					 	    	  map.put("ROW_COUNT", rowcnt+"");
-					 	    	  map.put("ERROR", dbname);
+					 	    	  map.put("START_TIME", start_time);
+					 	    	  map.put("STOP_TIME", stop_time);
+					 	    	  map.put("EXECUTION_TIME", timer.getEllapsed()+"");
+					 	    	  map.put("ROW_COUNT", rowcntStr);
+					 	    	  map.put("STATUS", status_cd);
+					 	    	  map.put("ERROR", ERR_MSG);
 					 	    	  map.put("PROCEDURE_NAME", this.procedure_name);	
 					 	    	   
 					 	    	  schmanager.updateMigTool(map);
@@ -74,25 +88,25 @@ public class migThread {
 				    		  break;
 				    	  case "SQL" :
 				    		  PreparedStatement pstmt = null;
-				    		  rowcnt = 0;
+				    		  int rowcnt = 0;
 				    		  try {
+				    			   start_time = schmanager.getCurrentDateTime();
 					    		   pstmt = conn.prepareStatement(sql); 
 					    		   rowcnt = pstmt.executeUpdate();	
-					    		   
+					    		   stop_time = schmanager.getCurrentDateTime();
 				    		  } catch (Exception e) {
 				    			   System.out.println("[" + process_id + "] ---- SQL 문장처리에서 오류가 발생하였습니다.= "+e.getMessage());
 				    			   ERR_MSG = e.getMessage();
 				    		  } finally {
-				    			  
 					 	    	   Map<String, String> map = new HashMap<String, String>();
 					 	    	   
-					 	    	   map.put("START_TIME", dbname);
-					 	    	   map.put("STOP_TIME", dbname);
-					 	    	   map.put("EXECUTION_TIME", dbname);
+					 	    	   map.put("START_TIME", start_time);
+					 	    	   map.put("STOP_TIME", stop_time);
+					 	    	   map.put("EXECUTION_TIME", timer.getEllapsed()+"");
 					 	    	   map.put("ROW_COUNT", rowcnt+"");
 					 	    	   map.put("ERROR", ERR_MSG);
 					 	    	   map.put("PROCEDURE_NAME", this.procedure_name);	
-					 	    	   
+
 					 	    	   schmanager.updateMigTool(map);
 					 	    	   schmanager.updateStatus(map);				    			  
 				    			  
@@ -109,10 +123,10 @@ public class migThread {
 		    		  PreparedStatement pstmt = null;
 		    		  int rowcnt = 0;
 		    		  try {
+		    			   start_time = schmanager.getCurrentDateTime();
 			    		   pstmt = conn.prepareStatement(sql); 
 			    		   rowcnt = pstmt.executeUpdate();
-			    		   
-			 	    	   Map<String, String> map = new HashMap<String, String>();
+			    		   stop_time = schmanager.getCurrentDateTime();
 			    		   
 		    		  } catch (Exception e) {
 		    			   System.out.println("[" + process_id + "] ---- SQL 문장처리에서 오류가 발생하였습니다.= "+e.getMessage());
