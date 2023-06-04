@@ -14,21 +14,45 @@ import java.util.concurrent.Executors;
 public class schmanager {
 
 	public static String mig_task_name;
+	private static Connection conn1 = null;
+	private static Connection conn2 = null;
+//	private static Connection conn3 = null;
 	/*+
 	 * 현재 작업의 Update를 위해
 	 */
-	public static void updateStatus(Connection conn, int process_id, String status_cd) throws Exception {
-		final String sql ="UPDATE  MIG_PROCESS_LIST \n"
+	public synchronized static void updateStatus(Map<String, String> map) throws Exception {
+		final String sql1 ="UPDATE  MIG_PROCESS_LIST \n"
            				+ "   SET  MIG_STATUS_CD = ?  \n"
 			        	+ " WHREE PROCESS_ID = ?  ";
+		
+		final String sql2 ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
+				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
+		
 		try {
-			PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
+			String status_cd = map.get("STATUS_CD");                       // 상태코드
+			int process_id = Integer.parseInt(map.get("PROCESS_ID"));      // Process ID
+			
+			PreparedStatement s1 = (PreparedStatement) conn1.prepareStatement(sql1);
 
 			s1.setString(1, status_cd);
 			s1.setInt(2, process_id);
 			
 		    int cnt = s1.executeUpdate();
+            /*******************************************************************
+		    // Mig History를 저장
+		     *******************************************************************/
+			s1 = (PreparedStatement) conn1.prepareStatement(sql2);
 
+			s1.setString(1, mig_task_name);
+			s1.setInt(2, Integer.parseInt(map.get("PROCESS_ID")));
+			s1.setString(3, map.get("START_TIME"));
+			s1.setString(4, map.get("STOP_TIME"));
+			s1.setString(5, map.get("EXECUTION_TIME"));
+			s1.setString(6, map.get("ROW_COUNT"));
+			s1.setString(7, map.get("ERROR"));
+
+		    cnt = s1.executeUpdate();		
+		    
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			throw new Exception(" Status Update Error ");
@@ -37,24 +61,34 @@ public class schmanager {
 	/*+
 	 * 기존 Mig Tool의 상태를 Update하기
 	 */
-	public static void updateMigTool(Connection conn, Map<String, String> map) throws Exception {
+	public synchronized static void updateMigTool(Map<String, String> map) throws Exception {
 		final String sql ="UPDATE MIG_JOB_STATUS \n"
 				+ "   SET START_TIME = ?      \n"
 				+ "     , STOP_TIME = ?       \n"
 				+ "     , EXECUTION_TIME = ?  \n"
 				+ "     , ROW_COUNT = ?       \n"
 				+ "     , ERROR = ?           \n"
-				+ " WHERE SUBSTR(JOBTIMESTAMP,1,8) IN ( TO_CHAR(SYSDATE-1,'YYYYMMDD'), TO_CHAR(SYSDATE,'YYYYMMDD') )  \n"
+				+ "     , STATUS = ?           \n"
+				+ " WHERE SUBSTR(JOBTIMESTAMP,1,8) IN ( TO_CHAR(SYSDATE-2,'YYYYMMDD'), TO_CHAR(SYSDATE+1,'YYYYMMDD') )  \n"
 				+ "   AND PROCEDURE_NAME = ? ";
 		try {
-			PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
-
+			String status_cd = "";
+			if(map.get("START_TIME").equals("C")) {
+				status_cd = "O";
+			} else {
+				status_cd = "E";
+			}
+			
+			PreparedStatement s1 = (PreparedStatement) conn2.prepareStatement(sql);
+			
 			s1.setString(1, map.get("START_TIME"));
 			s1.setString(2, map.get("STOP_TIME"));
 			s1.setString(3, map.get("EXECUTION_TIME"));
 			s1.setString(4, map.get("ROW_COUNT"));
 			s1.setString(5, map.get("ERROR"));
-			s1.setString(6, map.get("PROCEDURE_NAME"));
+			s1.setString(6, status_cd);
+			
+			s1.setString(7, map.get("PROCEDURE_NAME"));
 			
 		    int cnt = s1.executeUpdate();		
 			
@@ -115,27 +149,27 @@ public class schmanager {
 		return isComplete;
 	}
 	
-	public static void insertMigJobHistory(Connection conn, Map<String, String> map) throws Exception {
-		final String sql ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
-				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
-		try {
-			PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
-
-			s1.setString(1, mig_task_name);
-			s1.setInt(2, Integer.parseInt(map.get("PROCESS_ID")));
-			s1.setString(3, map.get("START_TIME"));
-			s1.setString(4, map.get("STOP_TIME"));
-			s1.setString(5, map.get("EXECUTION_TIME"));
-			s1.setString(6, map.get("ROW_COUNT"));
-			s1.setString(7, map.get("ERROR"));
-
-		    int cnt = s1.executeUpdate();		
-			
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			throw new Exception(" Mig Tool Update Error ");
-		}
-	}
+//	public synchronized static void insertMigJobHistory(Map<String, String> map) throws Exception {
+//		final String sql ="INSERT INTO MIG_PROCESS_HIST(MIG_HIST_NAME, PROCESS_ID,	MIG_START_TM,	MIG_END_TM,	ELAPSED_TIME,	ROW_CNT, ERROR_MESSAGE)\r\n"
+//				+ "    VALUE (?, ?, ?, ?, ?, ?, ? )";
+//		try {
+//			PreparedStatement s1 = (PreparedStatement) conn3.prepareStatement(sql);
+//
+//			s1.setString(1, mig_task_name);
+//			s1.setInt(2, Integer.parseInt(map.get("PROCESS_ID")));
+//			s1.setString(3, map.get("START_TIME"));
+//			s1.setString(4, map.get("STOP_TIME"));
+//			s1.setString(5, map.get("EXECUTION_TIME"));
+//			s1.setString(6, map.get("ROW_COUNT"));
+//			s1.setString(7, map.get("ERROR"));
+//
+//		    int cnt = s1.executeUpdate();		
+//			
+//		} catch(Exception ex) {
+//			ex.printStackTrace();
+//			throw new Exception(" Mig Tool Update Error ");
+//		}
+//	}
 	
 	private static void makeExcelTaskList(Connection conn) {
 		
@@ -145,33 +179,38 @@ public class schmanager {
 
 		boolean endFlag = false;
 		String sql = "";
-		Connection conn;
+		Connection migconn, stgconn;
 		try {
 			ExecutorService service = Executors.newFixedThreadPool(10);
-			ConnectionPool pool = ConnectionPool.getInstance();
-			conn = pool.getConnection();
+			ConnectionPoolMig migpool = ConnectionPoolMig.getInstance();
+//			ConnectionPoolStg stgpool = ConnectionPoolStg.getInstance();
+			migconn = migpool.getConnection();
+			conn1 = migpool.getConnection();       // 상태 Update용 Connection
+			conn2 = migpool.getConnection();
+//			conn3 = migpool.getConnection();
+			
 			
 			while(! endFlag) {
 				
 				// 1. 처리할 작업 List를 가져온다.
 				//    ( 선행작업이 끝난 작업의 List을 가져온다.)
-				List<MigJob> joblist = getMigjobList(conn);
+				List<MigJob> joblist = getMigjobList(migconn);
 				
 				// 2. procedure 형식에 따라 Task를 
 				for(MigJob job : joblist) {
 					switch(job.getSqlType()) {
 					case "SP" :
 						sql = job.getProcedureName() + "(?)";
-						service.submit(new migThread.Task(job.getProcesId(), job.getProcedureName(), job.getDbName(),sql));
+						service.submit(new migThread.Task(job.getProcesId(), job.getProcedureName(), job.getDbName(), job.getSqlType(), sql));
 						break;
 					case "SQL" :
 						// sql = "";
-						service.submit(new migThread.Task(job.getProcesId(), job.getProcedureName(), job.getDbName(),sql));
+						service.submit(new migThread.Task(job.getProcesId(), job.getProcedureName(), job.getDbName(), job.getSqlType(), sql));
 						break;
 					}
 				}
 				// 3. 작업이 모두 끝났는지 Check
-				if(isMigComplete(conn)) {
+				if(isMigComplete(migconn)) {
 					endFlag = true;
 				}
 				
@@ -180,7 +219,7 @@ public class schmanager {
 			}
 			
 			// 엑셀로 이행결과 출력
-			makeExcelTaskList(conn);
+			makeExcelTaskList(migconn);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

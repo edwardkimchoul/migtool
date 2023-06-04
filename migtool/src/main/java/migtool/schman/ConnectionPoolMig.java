@@ -3,7 +3,7 @@ package migtool.schman;
 import java.sql.*;
 import java.util.*;
 
-public final class ConnectionPool {
+public final class ConnectionPoolMig {
     static {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -22,14 +22,14 @@ public final class ConnectionPool {
     private final static int maxCons = 0;
 
     private int numCons = 0;
-    private static ConnectionPool cp;
+    private static ConnectionPoolMig cp;
 
     // ConnectionPool 객체 리턴
-    public static ConnectionPool getInstance()  { // (String url, String user, String password, int initialCons, int maxCons) {
+    public static ConnectionPoolMig getInstance()  { // (String url, String user, String password, int initialCons, int maxCons) {
         try {
             if (cp == null) {
-                synchronized (ConnectionPool.class) {
-                    cp = new ConnectionPool(url, user,
+                synchronized (ConnectionPoolMig.class) {
+                    cp = new ConnectionPoolMig(url, user,
                             password, initialCons, maxCons);
                 }
             }
@@ -39,7 +39,7 @@ public final class ConnectionPool {
         return cp;
     }
 
-    private ConnectionPool(String url, String user, String password, int initialCons, int maxCons) throws SQLException {
+    private ConnectionPoolMig(String url, String user, String password, int initialCons, int maxCons) throws SQLException {
 
         if (initialCons < 0)
             initialCons = 5;
@@ -72,8 +72,7 @@ public final class ConnectionPool {
 
     public synchronized Connection getConnection() throws SQLException {
 
-        if (free.isEmpty()) {
-
+    	if (free.isEmpty()) {
             while (numCons < maxCons) {
                 addConnection();
             }
