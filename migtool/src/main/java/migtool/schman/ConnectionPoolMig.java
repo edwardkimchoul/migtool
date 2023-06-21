@@ -15,11 +15,14 @@ public final class ConnectionPoolMig {
     private ArrayList<Connection> free;
     private ArrayList<Connection> used;
 
-    private final static String url = "";
-    private final static String user = "";
-    private final static String password = "";
-    private final static int initialCons = 0;
-    private final static int maxCons = 0;
+//    private final static String url = "jdbc:oracle:thin:@10.90.10.22:1521:DBMGR";
+//    private final static String user = "UGENS";
+//    private final static String password = "ugens123";
+    private final static String url = "jdbc:oracle:thin:@10.90.10.24:1521:PROD2";
+    private final static String user = "UGENS";
+    private final static String password = "ugens123";
+    private final static int initialCons = 10;
+    private final static int maxCons = 20;
 
     private int numCons = 0;
     private static ConnectionPoolMig cp;
@@ -77,6 +80,7 @@ public final class ConnectionPoolMig {
                 addConnection();
             }
         }
+    	System.out.println("Connection pool free size --->" + free.size());
         Connection _con = free.get(free.size() - 1);
         free.remove(_con);
         used.add(_con);
@@ -139,5 +143,9 @@ public final class ConnectionPoolMig {
     public int getNumCons() {
 
         return numCons;
+    }
+    public int getFreeCount() {
+
+        return free.size();
     }
 }

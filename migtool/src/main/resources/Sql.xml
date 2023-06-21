@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="dataQA">
+    <!-- =========================[ 현재 데이터 Count ]============================================= -->
+  	<!-- 전체 Table List 조회 -->
+    <sql id="sqltest">
+		select table_name TABLE_NAME
+		  from w4c.CONV_TABLE
+		 where SCHEMA_NAME = 'W4COWN'
+	--	    and use_yn ='Y'
+    </sql>
+	 	           
+</mapper>
+  

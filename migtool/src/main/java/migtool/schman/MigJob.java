@@ -2,16 +2,16 @@ package migtool.schman;
 
 public class MigJob {
 
-	private int    procesId;
+	private String procesId;
 	private String dbName;
 	private String procedureName;
 	private String sqlType;
 	
 	
-	public int getProcesId() {
+	public String getProcesId() {
 		return procesId;
 	}
-	public void setProcesId(int procesId) {
+	public void setProcesId(String procesId) {
 		this.procesId = procesId;
 	}
 	public String getDbName() {

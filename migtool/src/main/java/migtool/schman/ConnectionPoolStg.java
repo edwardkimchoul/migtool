@@ -15,11 +15,11 @@ public final class ConnectionPoolStg {
     private ArrayList<Connection> free;
     private ArrayList<Connection> used;
 
-    private final static String url = "";
-    private final static String user = "";
-    private final static String password = "";
-    private final static int initialCons = 0;
-    private final static int maxCons = 0;
+    private final static String url = "jdbc:oracle:thin:@192.168.7.86:1521:ORATSTG";
+    private final static String user = "app_dev";
+    private final static String password = "oracle";
+    private final static int initialCons = 2;
+    private final static int maxCons = 5;
 
     private int numCons = 0;
     private static ConnectionPoolStg cp;

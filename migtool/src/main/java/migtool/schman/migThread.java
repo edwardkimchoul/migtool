@@ -12,13 +12,13 @@ import java.util.Map;
 
 public class migThread {
     public static class Task implements Runnable {
-        int process_id;
+        String process_id;
         String procedure_name;
 	    String dbname;
     	String sql_type;
 	    String sql;
 	    
-	    public Task(int process_id, String procedure_name, String dbname, String Sql_type, String Sql) {
+	    public Task(String process_id, String procedure_name, String dbname, String Sql_type, String Sql) {
 	      this.process_id = process_id;
 	      this.procedure_name = procedure_name;
 	      this.dbname = dbname;
@@ -32,10 +32,12 @@ public class migThread {
 	    	String ERR_MSG = ""; 
 	    	String start_time = "";
 	        String stop_time = "";	
-	        String status_cd = "";
+	        String status_cd = "E";
 	    	Connection conn = null;
 	    	StopWatch timer = new StopWatch();
+	    	
 	      try {
+	    	  schmanager.updateStatus(process_id, "P");
              // 1. SQL Connection 가겨오기 sychoronize 사용
 	    	  switch(dbname) {
 		    	  case "MIG3" :
@@ -43,7 +45,7 @@ public class migThread {
 				      conn = migpool.getConnection();
 
 			    	  switch(sql_type) {
-				    	  case "PROCEDURE" :
+				    	  case "PRC" :
 				    		  CallableStatement cstmt = null;
 				    		  String rowcntStr = "0";
 				    		  try {
@@ -77,15 +79,20 @@ public class migThread {
 					 	    	  map.put("STATUS", status_cd);
 					 	    	  map.put("ERROR", ERR_MSG);
 					 	    	  map.put("PROCEDURE_NAME", this.procedure_name);	
-					 	    	   
+					 	    	  map.put("PROCESS_ID", process_id);
+					 	    	  
+					 	    	  
 					 	    	  schmanager.updateMigTool(map);
-					 	    	  schmanager.updateStatus(map);				    			  
-				    			  
-				    			   try {cstmt.close();} catch (Exception ignored){}
-				    			   try {migpool.releaseConnection(conn);} catch (Exception ignored) {}
+					 	    	  schmanager.updateStatus(process_id, status_cd);	
+					 	    	  schmanager.insertProcessHistory(map);
+					 	    	 
+				    			  try {cstmt.close();} catch (Exception ignored){}
+				    			  try { System.out.println("[" + process_id + "] ---- 작업완료 ");
+				    				   migpool.releaseConnection(conn);} catch (Exception ignored) {}
 				    		  }
 				    		  break;
 				    	  case "SQL" :
+				    	  case "PLSQL" :
 				    		  PreparedStatement pstmt = null;
 				    		  int rowcnt = 0;
 				    		  try {
@@ -93,9 +100,11 @@ public class migThread {
 					    		   pstmt = conn.prepareStatement(sql); 
 					    		   rowcnt = pstmt.executeUpdate();	
 					    		   stop_time = schmanager.getCurrentDateTime();
+					    		   status_cd = "C";
 				    		  } catch (Exception e) {
 				    			   System.out.println("[" + process_id + "] ---- SQL 문장처리에서 오류가 발생하였습니다.= "+e.getMessage());
 				    			   ERR_MSG = e.getMessage();
+				    			   status_cd = "E";
 				    		  } finally {
 					 	    	   Map<String, String> map = new HashMap<String, String>();
 					 	    	   
@@ -103,14 +112,18 @@ public class migThread {
 					 	    	   map.put("STOP_TIME", stop_time);
 					 	    	   map.put("EXECUTION_TIME", timer.getEllapsed()+"");
 					 	    	   map.put("ROW_COUNT", rowcnt+"");
+					 	    	   map.put("STATUS", status_cd);
 					 	    	   map.put("ERROR", ERR_MSG);
 					 	    	   map.put("PROCEDURE_NAME", this.procedure_name);	
+					 	    	   map.put("PROCESS_ID", process_id);
 
 					 	    	   schmanager.updateMigTool(map);
-					 	    	   schmanager.updateStatus(map);				    			  
+					 	    	   schmanager.updateStatus(process_id, status_cd);	
+					 	    	   schmanager.insertProcessHistory(map);
 				    			  
 				    			   try {pstmt.close();} catch (Exception ignored){}
-				    			   try {migpool.releaseConnection(conn);} catch (Exception ignored) {}
+				    			   try {System.out.println("[" + process_id + "] ---- 작업완료 ");
+				    				    migpool.releaseConnection(conn);} catch (Exception ignored) {}
 				    		  } 
 				    		  break;
 			    	  }
@@ -126,10 +139,11 @@ public class migThread {
 			    		   pstmt = conn.prepareStatement(sql); 
 			    		   rowcnt = pstmt.executeUpdate();
 			    		   stop_time = schmanager.getCurrentDateTime();
-			    		   
+			    		   status_cd = "C";
 		    		  } catch (Exception e) {
 		    			   System.out.println("[" + process_id + "] ---- SQL 문장처리에서 오류가 발생하였습니다.= "+e.getMessage());
 		    			   ERR_MSG = e.getMessage();
+		    			   status_cd = "E";
 		    		  } finally {
 		    			  
 			 	    	   Map<String, String> map = new HashMap<String, String>();
@@ -138,11 +152,13 @@ public class migThread {
 			 	    	   map.put("STOP_TIME", dbname);
 			 	    	   map.put("EXECUTION_TIME", dbname);
 			 	    	   map.put("ROW_COUNT", rowcnt+"");
+			 	    	   map.put("STATUS", status_cd);
 			 	    	   map.put("ERROR", ERR_MSG);
 			 	    	   map.put("PROCEDURE_NAME", this.procedure_name);	
 			 	    	   
 			 	    	   schmanager.updateMigTool(map);
-			 	    	   schmanager.updateStatus(map);
+			 	    	   schmanager.updateStatus(process_id, status_cd);	
+			 	    	   schmanager.insertProcessHistory(map);
 		    			  
 		    			   try {pstmt.close();} catch (Exception ignored){}
 		    			   try {stgpool.releaseConnection(conn);} catch (Exception ignored) {}
