@@ -28,11 +28,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 /* ******************************************************************** 
- * PROGRAM : OGG 데이터를 전체 Copy 하기 위해 스케쥴러
- * -------  ST로 시작하는 Process_ID 수행
+ * PROGRAM : 제증명 이행을 위한 이행 스케쥴러 
+ * -------  F로 시작하는 Process_ID 수행
  * 
  * ********************************************************************/
-public class schmanager2 {
+public class schmanager3 {
 
 	public static String mig_task_name;
 	private static Connection conn1 = null;
@@ -97,7 +97,7 @@ public class schmanager2 {
 		    // Mig History를 저장
 		     *******************************************************************/
 
-			s1.setString(1, mig_task_name);
+			s1.setString(1, schmanager3.mig_task_name);
 			s1.setString(2, map.get("PROCESS_ID"));
 			s1.setString(3, map.get("START_TIME"));
 			s1.setString(4, map.get("STOP_TIME"));
@@ -158,7 +158,7 @@ public class schmanager2 {
 				+ "  FROM CNV_PROCESS_LIST2 M \n"
 				+ " WHERE M.MIG_STATUS_CD = 'R'   \n"
 				+ "   AND M.PROCESS_ID NOT LIKE 'P%'   \n"
-				+ "   AND M.PROCESS_ID LIKE 'ST%'   \n"
+				+ "   AND M.PROCESS_ID LIKE 'F%'   \n"
 				+ "   AND FN_MIG_NOT_COMPLETE_CNT( M.PRECEDING_WORK_LIST ) = 0 \n"
 				+ "   ORDER BY PRIORITY_NO, \n"
 				+ "     DECODE(SUBSTR(M.PROCESS_ID,1,3),'164', 1, '172',2, '184', 3, '261', 4, '182', 5, '019', 6, '161', 7, 9), \n"
@@ -189,7 +189,7 @@ public class schmanager2 {
 		final String sql ="SELECT COUNT(1) CNT \n"
 				+ "  FROM CNV_PROCESS_LIST2 M \n"
 				+ " WHERE M.MIG_STATUS_CD IN ( 'R', 'Q', 'P' ) \n"
-		        + "   AND M.PROCESS_ID LIKE 'ST%'   \n";
+		        + "   AND M.PROCESS_ID LIKE 'F%'   \n";
 		try (PreparedStatement s1 = (PreparedStatement) conn.prepareStatement(sql);
 			     ResultSet rs = s1.executeQuery()) {
 					
@@ -310,9 +310,9 @@ public class schmanager2 {
 		Connection migconn;
 		
 		if(args.length != 1) {
-			System.out.println("schmanager2 [taskname] ");
+			System.out.println("schmanager3 [taskname] ");
 			System.out.println("=========================================================================");
-			System.out.println("======[ Mig Scheduler(OGG) Ver 1.1  ]");
+			System.out.println("======[ Mig Scheduler(제증명 이행) Ver 1.1  ]");
 			System.out.println("=========================================================================");
 			System.exit(0);
 		} else {

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,6 +36,17 @@ public class schmanager {
 	private static Connection conn3 = null;
 	private static HashMap<String, String> sqlHash;
 
+	
+	
+    private static Connection getNewConnection() throws SQLException {
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(ConnectionPoolMig.url, ConnectionPoolMig.user, ConnectionPoolMig.password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return con;
+    }
 //	private static Connection conn3 = null;
 	/*+
 	 * 현재 작업의 Update를 위해
@@ -46,6 +58,10 @@ public class schmanager {
                        	+ "   AND MIG_STATUS_CD != 'E' ";
 		
 		try {
+			// connection 복구코드를 넣음.
+			if(conn1 == null || conn1.isClosed()) {
+				conn1 = getNewConnection();
+			}
 			PreparedStatement s1 = (PreparedStatement) conn1.prepareStatement(sql1);
 
 			s1.setString(1, status_cd);
@@ -69,6 +85,10 @@ public class schmanager {
 				+ "    VALUES (CNV_PLSQL_STRUCT_SEQ.nextval, ?, ?, ?, ?, ?, ?, ? )";
 		
 		try {
+			// connection 복구코드를 넣음.
+			if(conn3 == null || conn3.isClosed()) {
+				conn3 = getNewConnection();
+			}
 
 			PreparedStatement s1 = (PreparedStatement) conn3.prepareStatement(sql2);
             /*******************************************************************
@@ -101,7 +121,7 @@ public class schmanager {
 				+ "     , ROW_COUNT = ?       \n"
 				+ "     , ERROR = ?           \n"
 				+ "     , STATUS = ?           \n"
-				+ " WHERE SUBSTR(JOB_TIMESTAMP,1,8) = '20230616'  \n"
+				+ " WHERE SUBSTR(JOB_TIMESTAMP,1,8) = '20230630'  \n"
 				+ "   AND PROCEDURE_NAME = ? ";
 		try {
 			String status_cd = "";
@@ -111,6 +131,10 @@ public class schmanager {
 				status_cd = "E";
 			}
 			
+			// connection 복구코드를 넣음.
+			if(conn2 == null || conn2.isClosed()) {
+				conn2 = getNewConnection();
+			}
 			PreparedStatement s1 = (PreparedStatement) conn2.prepareStatement(sql);
 			
 			s1.setString(1, map.get("START_TIME"));
@@ -290,6 +314,9 @@ public class schmanager {
 		
 		if(args.length != 1) {
 			System.out.println("schmanager [taskname] ");
+			System.out.println("=========================================================================");
+			System.out.println("======[ Mig Scheduler Ver 1.2  ]");
+			System.out.println("=========================================================================");
 			System.exit(0);
 		} else {
 			mig_task_name = args[0];     // Task이름은 mig날짜로 할것  20230601 오류시 20230601-1   
@@ -313,7 +340,11 @@ public class schmanager {
 			
 			
 			while(! endFlag) {
-				
+
+				// 0. connection 복구코드를 넣음.
+				if(migconn == null || migconn.isClosed()) {
+					migconn = getNewConnection();
+				}
 				// 1. 처리할 작업 List를 가져온다.
 				//    ( 선행작업이 끝난 작업의 List을 가져온다.)
 				List<MigJob> joblist = getMigjobList(migconn);
@@ -348,6 +379,10 @@ public class schmanager {
 				// 10초후 작업을 재개 한다. (전체 작업이 끝날때까지 계속한다.)
 				Thread.sleep(10000);
 			}
+			System.out.println("=========================================================================");
+			System.out.println("======[ Mig Scheduler Ver 1.1  ]");
+			System.out.println("======[ Data migration complete  ]");
+			System.out.println("=========================================================================");
 			
 			// 엑셀로 이행결과 출력
 			//makeExcelTaskList(migconn);

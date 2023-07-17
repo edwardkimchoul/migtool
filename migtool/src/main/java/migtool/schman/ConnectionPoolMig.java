@@ -18,9 +18,9 @@ public final class ConnectionPoolMig {
 //    private final static String url = "jdbc:oracle:thin:@10.90.10.22:1521:DBMGR";
 //    private final static String user = "UGENS";
 //    private final static String password = "ugens123";
-    private final static String url = "jdbc:oracle:thin:@10.90.10.24:1521:PROD2";
-    private final static String user = "UGENS";
-    private final static String password = "ugens123";
+    public final static String url = "jdbc:oracle:thin:@10.90.10.24:1521:PROD2";
+    public final static String user = "UGENS";
+    public final static String password = "ugens123";
     private final static int initialCons = 10;
     private final static int maxCons = 20;
 
@@ -82,6 +82,12 @@ public final class ConnectionPoolMig {
         }
     	System.out.println("Connection pool free size --->" + free.size());
         Connection _con = free.get(free.size() - 1);
+
+        // 0. 외부에 의해 Connection이 끊겼을때를 위한 복구코드
+		if(_con == null || _con.isClosed()) {
+			_con = getNewConnection();
+		}
+		
         free.remove(_con);
         used.add(_con);
         return _con;

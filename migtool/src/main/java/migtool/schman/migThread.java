@@ -59,7 +59,7 @@ public class migThread {
 					    	      String result = cstmt.getString(1);
 					    	      if(result.substring(0, 3).equals("SUC")) {
 					    	    	  status_cd = "C";
-					    	    	  rowcntStr = result.substring(4);
+					    	    	 // rowcntStr = result.substring(4, result.indexOf("->"));
 					    	      } else {
 					    	    	  status_cd = "E";
 					    	    	  ERR_MSG = result.substring(4);
