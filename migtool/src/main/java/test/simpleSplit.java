@@ -23,6 +23,12 @@ public class simpleSplit {
 	private static long  calcValue(String str) {
 		long val = 0;
 		if(! str.trim().equals("")) {
+			
+			int pos = str.indexOf("(");
+			if(pos > 0) {
+				str = str.substring(0, str.indexOf("(")-1);
+			}
+			
 			char ch = str.trim().charAt(str.trim().length()-1);
 			if(ch == 'M') {
 				val = Long.parseLong(str.trim().replaceAll("M", "")) * 1000000;
@@ -36,15 +42,17 @@ public class simpleSplit {
 	}
 	private static int calcSecond(String str) {
 		
-		String timeStr = str.substring(0,8);
-//		System.out.println("timeStr--->[" + timeStr +"]");
-		
-		return 0;
-	}
-	public static void main(String[] args) {
-		String line = "|*  2 |   HASH JOIN                       |                  |      1 |     64M|     92M|00:00:53.64 |    3714K|   4686K|    590K|   146M|    15M| 6587K (1)|    3910M|";
-//		String str = "a,b,c,d,e,f,g";
+		int sec = 0;
+		String[] splitStr = str.trim().substring(0,8).split(":");
 
+		for(int i=0; i< 3; i++) {
+			sec = sec * 60 + Integer.parseInt(splitStr[i].trim()); 
+		}
+		return sec;
+	}
+	
+	public static void main(String[] args) {
+		String line = "|*  2 |   HASH JOIN                       |                  |      1 |     64M|     92M|01:12:53.64 |    3714K|   4686K|    590K|   146M|    15M| 6587K (1)|    3910M|";
 
 		List<String> list = Arrays.asList(line.split("\\|"));
 
@@ -64,6 +72,8 @@ public class simpleSplit {
 				case 2 :
 					planData.setOperation(str);
 					planData.setDepth(countDepth(str));
+//					System.out.println( planData.getOperation());
+//					System.out.println( planData.getDepth());
 					break;
 				case 3 :
 					planData.setName(str);
@@ -80,9 +90,11 @@ public class simpleSplit {
 				case 7 :
 					planData.setA_time(str);
 					planData.setA_exec_sec(calcSecond(str));
+//					System.out.println( planData.getA_exec_sec() );
 					break;
 				case 8 :
 					planData.setBuffers(calcValue(str));
+//					System.out.println( planData.getBuffers());
 					break;
 				case 9 :
 					planData.setReads(calcValue(str));
@@ -98,14 +110,16 @@ public class simpleSplit {
 					break;
 				case 13 :
 					planData.setUsed_mem(calcValue(str));
+//					System.out.println( planData.getUsed_mem() );
 					break;
 				case 14 :
 					planData.setUsed_temp(calcValue(str));
+//					System.out.println( planData.getUsed_temp() );
 					break;
 			}
-			System.out.println(no + " : [" + str + "]");
+//			System.out.println(no + " : [" + str + "]");
 			no++;
 		}
 	}
-
+//    System.out.println( planData)
 }
