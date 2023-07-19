@@ -47,7 +47,6 @@ public class schmanager {
         }
         return con;
     }
-//	private static Connection conn3 = null;
 	/*+
 	 * 현재 작업의 Update를 위해
 	 */
