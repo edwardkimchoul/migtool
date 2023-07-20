@@ -54,7 +54,7 @@ SELECT M.PROCESS_ID, M.DB_NAME, M.PROCEDURE_NAME, M.SQL_TYPE_CD
  WHERE M.MIG_STATUS_CD = 'R'   
    AND FN_MIG_NOT_COMPLETE_CNT( M.PRECEDING_WORK_LIST ) = 0
    ORDER BY PROCESS_ID;
-   
+--  ----------------------------------------------- 
 --  타 시스템과 데이터 건수 비교 및 전 회차와 비교를 위해
 --  ----------------------------------------------- 
 DROP TABLE UGENS.CNV_DATA_COUNT CASCADE CONSTRAINTS;
@@ -65,7 +65,7 @@ CREATE TABLE UGENS.CNV_DATA_COUNT (
 			,   ROW_COUNT               NUMBER(20)
 			,   constraint CNV_DATA_COUNT_PK1 PRIMARY KEY ( DATA_GROUP,  YYYYMMDD   , TABLE_NAME )
 );
-
+--  ----------------------------------------------- 
 -- 비교대상 시스템 또는 회차와 비교 및 오차율 표시 
 ------------------------------------------------------------
 SELECT *
@@ -86,7 +86,6 @@ FROM (
     )
 )
 ORDER BY DIFF_RATE DESC;
-
 
 SELECT TABLE_NAME, S_CNT, T_CNT, DIFF, DIFF_RATE
 FROM (

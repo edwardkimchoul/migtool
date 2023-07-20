@@ -1,19 +1,22 @@
 package tunesql.trace;
 
+import java.util.List;
+
 public class TraceData {
-	PlanData planData;
-	PredicateData predicateData;
+	List<PlanData> planlist;
+	List<PredicateData> predicatelist;
 	
-	public PlanData getPlanData() {
-		return planData;
+	public List<PlanData> getPlanlist() {
+		return planlist;
 	}
-	public void setPlanData(PlanData planData) {
-		this.planData = planData;
+	public void setPlanlist(List<PlanData> planlist) {
+		this.planlist = planlist;
 	}
-	public PredicateData getPredicateData() {
-		return predicateData;
+	public List<PredicateData> getPredicatelist() {
+		return predicatelist;
 	}
-	public void setPredicateData(PredicateData predicateData) {
-		this.predicateData = predicateData;
+	public void setPredicatelist(List<PredicateData> predicatelist) {
+		this.predicatelist = predicatelist;
 	}
+	
 }

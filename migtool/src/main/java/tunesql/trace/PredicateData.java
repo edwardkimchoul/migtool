@@ -24,3 +24,4 @@ public class PredicateData {
 		this.condition_str = condition_str;
 	}
 }
+

@@ -103,6 +103,8 @@ public class trace {
 		return sec;
 	}
 	
+	
+	
 	private static PlanData planParse(String plan_str) {
 		List<String> list = Arrays.asList(plan_str.split("\\|"));
 
@@ -172,10 +174,34 @@ public class trace {
 		}	
 		return planData;
     }
-	
-	public static String getTraceList(Connection conn, String sql_id) throws Exception {
+
+	private static PredicateData predicateParse(String predicate_str) {
+		List<String> list = Arrays.asList(predicate_str.split("-"));
 		
+		PredicateData predicateData = new PredicateData();
+		
+		for(int i=0; i<2; i++) {
+			switch(i) {
+				case 0 :
+					predicateData.setId( Integer.parseInt(list.get(i).trim()) );
+					break;
+				case 1 :
+					String str = list.get(i);
+					String opr = str.substring(0, str.indexOf("(")).trim();
+					String cond_str = str.substring(str.indexOf("(")+1).trim();
+					predicateData.setOperation(opr);
+					predicateData.setCondition_str(cond_str);
+					break;
+			}
+		}
+		return predicateData;
+	}
+	
+	public static TraceData getTraceList(Connection conn, String sql_id) throws Exception {
+		
+		TraceData tracedata = new TraceData(); 
 		List<PlanData> plan_list = new ArrayList<PlanData>(); 
+		List<PredicateData> predicate_list = new ArrayList<PredicateData>(); 
 		
 		final String sql1 ="SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR( ?, 0, 'ALLSTATS LAST'))  ";
 
@@ -212,16 +238,19 @@ public class trace {
 						}
 						break;
 					case 2:
+						if(output.trim().length() > 0 && ! output.substring(0, 5).equals("-----") ) {
+							//List<String> list = Arrays.asList(output.split("-"));
+							predicate_list.add(predicateParse(output));
+						}
 						break;
-					case 3:
-						break;
-					case 4:
-						break;
-				}
+				}				
 				System.out.println(output);
 			}
 			
-		    return sql_id;
+			tracedata.setPlanlist(plan_list);
+			tracedata.setPredicatelist(predicate_list);
+			
+		    return tracedata;
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			throw new Exception(" Plan table output error ");
@@ -233,7 +262,7 @@ public class trace {
 			conn = getConnection();
 
 			String sql_id = getSqlID(conn, "년월");
-			getTraceList(conn, sql_id);
+			TraceData tracedata = getTraceList(conn, sql_id);
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
