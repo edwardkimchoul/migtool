@@ -23,5 +23,9 @@ public class PredicateData {
 	public void setCondition_str(String condition_str) {
 		this.condition_str = condition_str;
 	}
+	@Override
+	public String toString() {
+		return "PredicateData [id=" + id + ", operation=" + operation + ", condition_str=" + condition_str + "]";
+	}
 }
 

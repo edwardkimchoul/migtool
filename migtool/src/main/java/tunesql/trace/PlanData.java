@@ -1,5 +1,8 @@
 package tunesql.trace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlanData {
 	int id;
 	String operation;
@@ -19,6 +22,11 @@ public class PlanData {
 	
 	String filter_yn;
 	int depth;
+	List<Integer> leaf_list;
+
+	public PlanData() {
+		leaf_list = new ArrayList<Integer>();
+	}
 	
 	public int getId() {
 		return id;
@@ -121,5 +129,21 @@ public class PlanData {
 	}
 	public void setDepth(int depth) {
 		this.depth = depth;
+	}
+	public List<Integer> getLeaf_list() {
+		return leaf_list;
+	}
+
+	public void addLeaf_list(int node_id) {
+		leaf_list.add(node_id);
+	}
+
+	@Override
+	public String toString() {
+		return "PlanData [id=" + id + ", operation=" + operation + ", name=" + name + ", starts=" + starts + ", e_rows="
+				+ e_rows + ", a_rows=" + a_rows + ", a_time=" + a_time + ", a_exec_sec=" + a_exec_sec + ", buffers="
+				+ buffers + ", reads=" + reads + ", writes=" + writes + ", men0=" + men0 + ", mem1=" + mem1
+				+ ", used_mem=" + used_mem + ", used_temp=" + used_temp + ", filter_yn=" + filter_yn + ", depth="
+				+ depth + ", leaf_list=" + leaf_list + "]";
 	}
 }
