@@ -10,6 +10,10 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.gana.data.Item;
+import com.gana.data.Token;
+import com.gana.tool.parser.Lexer;
+
 public class recognition {
 	private static List<item> resultset;
 	private static String axis = "WITH|SELECT|FROM|WHERE|ORDER|GROUP";
@@ -45,16 +49,62 @@ public class recognition {
 	}
 	
 	public static void main(String[] args) {
-		String inputLine;
-		String whitespaceMetaChar = "\\s";
-		try {		
-			// 1. file 읽기 
-			String filename = "c:/work/s_org.sql";
-			BufferedReader dataReader = new BufferedReader(new FileReader(filename));
-			while ((inputLine = dataReader.readLine()) != null) {
-				String[] splited = inputLine.split(whitespaceMetaChar);
-			}	
+
+		List<Item> itemList = new ArrayList<Item>();
 		
+		try {		
+			// 1. Lexcer process
+			Lexer.parseRegex("C:\\work\\testdata\\Sql1.xml");
+			// 2. pattern pre-process --> Attributed Token list
+			Item item = new Item();
+			boolean flag = true;
+			for(int i=0; i<Lexer.tokens.size(); i++) {
+				Token token = Lexer.tokens.get(i);
+				String metaName = token.getMetaData();
+				switch(metaName) {
+					case "comment" :
+						item.addToken(token);
+						break;
+					case "char" :    // Check whether Operator or , 
+						String tokenStr = token.getStmt();
+						if(tokenStr.equals("+") || 
+					  	   tokenStr.equals("-") || 	
+					  	   tokenStr.equals("*")	||					  	   
+					  	   tokenStr.equals("/") ||
+					  	   tokenStr.equals("||")) {
+							  metaName = "operator";
+						} else if(tokenStr.equals("=")  ||
+							      tokenStr.equals(">")  || 	
+							  	  tokenStr.equals("<")	||					  	   
+							  	  tokenStr.equals(">=") ||
+							  	  tokenStr.equals("<="))  {  // comparison operator	  
+							 metaName = "comparision_operator";
+						} else if(tokenStr.equals(",") )  {  // separator delimeter
+							 metaName = tokenStr;
+						}
+						if(! flag ) {
+							itemList.add(item);
+							item = new Item();
+						} else {
+							flag = false;
+						}
+						item = new Item();
+						item.setName(metaName);
+						item.addToken(token);						
+						break;
+					default :
+						if(! flag ) {
+							itemList.add(item);
+							item = new Item();
+						} else {
+							flag = false;
+						}
+						item = new Item();
+						item.setName(metaName);
+						item.addToken(token);
+				}
+
+			}			
 			// 2. 개별 데이터 일기 
 			
 			
