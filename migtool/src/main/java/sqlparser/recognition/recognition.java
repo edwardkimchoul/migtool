@@ -108,9 +108,17 @@ public class recognition {
 				if(brace_cnt > 0) {
 					braceItemList.add(gitem);
 				} else {
+					// 
 					String axis = gitem.axis;
 					switch(axis) {
-						
+						case "SELECT" :
+						case "FROM" :
+						case "ORDER" :
+						case "GROUP" :
+							
+							break;
+						case "WHERE" :
+							break;
 					}
 					
 				}
